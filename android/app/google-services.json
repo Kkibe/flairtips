@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "988342307794",
+    "project_id": "football2024-f741a",
+    "storage_bucket": "football2024-f741a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988342307794:android:c688d8cc344dc929f4d60b",
+        "android_client_info": {
+          "package_name": "com.goalgenius"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyFiTQQBiUqMj7_Qsm37Vfn26BoLiPFi8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
