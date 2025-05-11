@@ -1,10 +1,29 @@
+import 'package:flairtips/utils/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:goalgenius/widgets/custom_filled_button.dart';
-import 'package:goalgenius/widgets/custom_outlined_button.dart';
+import 'package:flairtips/widgets/custom_filled_button.dart';
+import 'package:flairtips/widgets/custom_outlined_button.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
+
+  @override
+  OnboardingScreenState createState() => OnboardingScreenState();
+}
+
+class OnboardingScreenState extends State<OnboardingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkUserLoggedIn();
+  }
+
+  void _checkUserLoggedIn() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: true);
+    final user = userProvider.user;
+    if (user != null) Navigator.pushReplacementNamed(context, "/main");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +35,7 @@ class OnboardingScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 9.0, vertical: 10.0),
             child: TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, "/main");
+                Navigator.pushReplacementNamed(context, "/main");
               },
               child: Text(
                 'Skip',
@@ -36,7 +55,7 @@ class OnboardingScreen extends StatelessWidget {
               spacing: 16,
               children: const [
                 Text(
-                  'Welcome to GoalGenius',
+                  'Welcome to flairtips',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                   textAlign: TextAlign.center,
                 ),

@@ -1,4 +1,4 @@
-# Goalgenius
+# flairtips
 
 A new Flutter project.
 

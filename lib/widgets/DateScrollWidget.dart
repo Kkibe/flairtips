@@ -13,7 +13,7 @@ class DateScrollWidgetState extends State<DateScrollWidget>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true; // Keep widget alive
-  int selectedIndex = 3; // Default to today (middle of the list)
+  int selectedIndex = 6; // Default to today (middle of the list)
 
   List<Map<String, String>> getDateRange(int pastDays, int futureDays) {
     List<Map<String, String>> dateList = [];
@@ -34,7 +34,7 @@ class DateScrollWidgetState extends State<DateScrollWidget>
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, String>> dateList = getDateRange(3, 7);
+    List<Map<String, String>> dateList = getDateRange(6, 0);
     return Container(
       height: 52,
       child: ListView.builder(
@@ -67,7 +67,7 @@ class DateScrollWidgetState extends State<DateScrollWidget>
                   end: Alignment.centerRight,
                   colors: [
                     Colors.blueAccent.withOpacity(0.1),
-                    Colors.purple.withOpacity(0.2),
+                    Colors.green.withOpacity(0.2),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(

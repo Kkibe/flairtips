@@ -1,15 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:ui';
+
+import 'package:flairtips/utils/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:goalgenius/ads/banner.dart';
-import 'package:goalgenius/ads/rewarded.dart';
-import 'package:goalgenius/models/tip.dart';
-import 'package:goalgenius/screens/navigation_util.dart';
-import 'package:goalgenius/utils/user_data_service.dart';
-import 'package:goalgenius/widgets/custom_appbar.dart';
-import 'package:goalgenius/widgets/custom_filled_button.dart';
-import 'package:goalgenius/widgets/custom_outlined_button.dart';
-import 'package:goalgenius/widgets/faded_divider.dart';
-import 'package:goalgenius/widgets/social_icons.dart';
+import 'package:flairtips/models/tip.dart';
+import 'package:flairtips/widgets/custom_appbar.dart';
+import 'package:flairtips/widgets/faded_divider.dart';
+import 'package:flairtips/widgets/social_icons.dart';
+import 'package:provider/provider.dart';
 
 class TipDetail extends StatefulWidget {
   final Tip tip;
@@ -20,90 +17,270 @@ class TipDetail extends StatefulWidget {
 }
 
 class _TipDetailState extends State<TipDetail> {
-  final RewardedAdHelper rewardedAdHelper = RewardedAdHelper();
   bool canView = false;
   bool isPremium = false;
-  final currentUser = FirebaseAuth.instance.currentUser;
-
-  @override
-  void initState() {
-    super.initState();
-    rewardedAdHelper.loadAd();
-
-    // Default: allow viewing if tip is finished
-    canView = widget.tip.status == "finished";
-
-    _initUser(); // async logic here
-  }
-
-  Future<void> _initUser() async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user != null && user.email != null) {
-      await UserDataService().fetchUserData(user.email!);
-
-      if (!mounted) return;
-
-      setState(() {
-        // Update canView based on premium status
-        canView = UserDataService().isPremium;
-        isPremium = UserDataService().isPremium;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: true);
+    final isUserPremium = userProvider.user?.isPremium ?? false;
+
+    final canView =
+        !widget.tip.premium ||
+        widget.tip.isScoreUpdated ||
+        (widget.tip.premium && !widget.tip.isScoreUpdated && isUserPremium);
+
     return Scaffold(
       appBar: CustomAppBar(tip: widget.tip, canView: canView),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          !isPremium
-              ? Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-                child:
-                    widget.tip.status == "pending"
-                        ? Column(
-                          spacing: 12,
-                          children: [
-                            CustomOutlinedButton(
-                              text: "Unlock With Free Ads",
-                              onPressed: () {
-                                rewardedAdHelper.showAd(
-                                  context: context,
-                                  onRewardEarned: () {
-                                    setState(() {
-                                      canView = true;
-                                    });
-                                  },
-                                );
-                              },
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 12),
+                FadedDivider(
+                  color: Colors.grey,
+                  thickness: 1,
+                  height: 1,
+                  fadeWidth: 40,
+                ),
+                SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Center(
+                            child: Text(
+                              "Tip",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
-                            FadedDivider(
-                              color: Colors.purpleAccent,
-                              thickness: 1,
-                              height: 1,
-                              fadeWidth: 60,
+                          ),
+                          SizedBox(height: 6),
+                          Center(
+                            child: Card(
+                              margin: EdgeInsets.all(4.0),
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.0),
+                                side: BorderSide(color: Colors.grey, width: .5),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 6),
+                                child: Center(
+                                  child:
+                                      !canView
+                                          ? ImageFiltered(
+                                            imageFilter: ImageFilter.blur(
+                                              sigmaX: 5,
+                                              sigmaY: 5,
+                                            ),
+                                            child: Text(
+                                              widget.tip.tip,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          )
+                                          : Text(
+                                            widget.tip.tip,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                ),
+                              ),
                             ),
-                            CustomFilledButton(
-                              text: "Unlock With VIP Membership",
-                              onPressed: () => {conditionalNavigation(context)},
-                            ),
-                          ],
-                        )
-                        : CustomFilledButton(
-                          text: "Join VIP Membership",
-                          onPressed: () {
-                            conditionalNavigation(context);
-                          },
-                        ),
-              )
-              : SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
+                    ),
 
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Center(
+                            child: Text(
+                              "Best Tip",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Card(
+                            margin: EdgeInsets.all(4.0),
+                            clipBehavior: Clip.hardEdge,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4.0),
+                              side: BorderSide(color: Colors.grey, width: .5),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 6),
+                              child: Center(
+                                child:
+                                    !canView
+                                        ? ImageFiltered(
+                                          imageFilter: ImageFilter.blur(
+                                            sigmaX: 5,
+                                            sigmaY: 5,
+                                          ),
+                                          child: Text(
+                                            widget.tip.bestTip,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        )
+                                        : Text(
+                                          widget.tip.bestTip,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12),
+                FadedDivider(
+                  color: Colors.grey,
+                  thickness: 1,
+                  height: 1,
+                  fadeWidth: 40,
+                ),
+                SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Center(child: Text("1")),
+                          SizedBox(height: 6),
+                          Center(
+                            child: Card(
+                              margin: EdgeInsets.all(4.0),
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.0),
+                                side: BorderSide(color: Colors.grey, width: .5),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 6),
+                                child: Center(
+                                  child: Text(
+                                    widget.tip.homeOdd,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Center(child: Text("x")),
+                          SizedBox(height: 6),
+                          Center(
+                            child: Card(
+                              margin: EdgeInsets.all(4.0),
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.0),
+                                side: BorderSide(color: Colors.grey, width: .5),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 6),
+                                child: Center(
+                                  child: Text(
+                                    widget.tip.drawOdd,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Center(child: Text("2")),
+                          SizedBox(height: 6),
+                          Center(
+                            child: Card(
+                              margin: EdgeInsets.all(4.0),
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.0),
+                                side: BorderSide(color: Colors.grey, width: .5),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 6),
+                                child: Center(
+                                  child: Text(
+                                    widget.tip.awayOdd,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12),
+                FadedDivider(
+                  color: Colors.grey,
+                  thickness: 1,
+                  height: 1,
+                  fadeWidth: 40,
+                ),
+                SizedBox(height: 12),
+                widget.tip.premium
+                    ? Text(
+                      "👑 Subscribe To View Tip",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                    : SizedBox.shrink(),
+                SizedBox(height: 4),
+              ],
+            ),
+          ),
           SocialIcons(),
-          BannerAdWidget(),
+          SizedBox(height: 8),
         ],
       ),
     );

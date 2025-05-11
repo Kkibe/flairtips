@@ -1,22 +1,12 @@
-import 'dart:async';
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:flairtips/utils/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:goalgenius/firebase_options.dart';
-import 'package:goalgenius/screens/bottom_nav.dart';
-import 'package:goalgenius/screens/onboarding_screen.dart';
-import 'package:goalgenius/screens/payment_page.dart';
-import 'package:goalgenius/screens/sign_in_screen.dart';
-import 'package:goalgenius/screens/sign_up_screen.dart';
-import 'package:goalgenius/utils/colors.dart';
-import 'package:goalgenius/utils/constants.dart';
-import 'package:goalgenius/utils/theme_provider.dart';
-import 'package:goalgenius/utils/user_data_service.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:flairtips/screens/bottom_nav.dart';
+import 'package:flairtips/screens/onboarding_screen.dart';
+import 'package:flairtips/screens/sign_in_screen.dart';
+import 'package:flairtips/screens/sign_up_screen.dart';
+import 'package:flairtips/utils/colors.dart';
+import 'package:flairtips/utils/theme_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 const String taskKey = "fetch_shared_prefs_task";
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -24,50 +14,24 @@ bool isServiceRunning = false; // Flag to track if the service is running
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  final currentUser = FirebaseAuth.instance.currentUser;
-
-  if (currentUser != null && currentUser.email != null) {
-    final email = currentUser.email!;
-
-    // Check if subscription expired and downgrade
-    await UserDataService().validateAndExpireSubscription(email);
-
-    // Fetch latest user data
-    await UserDataService().fetchUserData(email);
-
-    // Only initialize ads for non-premium users
-    if (!UserDataService().isPremium) {
-      await MobileAds.instance.initialize();
-    }
-  } else {
-    // User is not logged in — optionally show ads
-    await MobileAds.instance.initialize();
-  }
-
+  final userProvider = UserProvider();
+  await userProvider.loadUser();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
-      child: AppInitializer(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => userProvider),
+      ],
+      child: MyApp(),
     ),
   );
-
-  // Enable verbose logging for debugging (remove in production)
-  OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
-  // Initialize with your OneSignal App ID
-  OneSignal.initialize(oneSignalAppID);
-  // Use this method to prompt for push notifications.
-  // We recommend removing this method after testing and instead use In-App Messages to prompt for notification permission.
-  OneSignal.Notifications.requestPermission(false);
 }
 
 class MyApp extends StatefulWidget {
-  final bool isFirstLaunch;
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
-  const MyApp({super.key, required this.isFirstLaunch});
+  const MyApp({super.key});
   @override
   MyAppState createState() => MyAppState();
 }
@@ -83,7 +47,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Goal Genius',
+      title: 'Flair Tips',
       themeMode:
           Provider.of<ThemeProvider>(context).isDarkMode
               ? ThemeMode.dark
@@ -424,8 +388,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ),
       ),
 
-      initialRoute:
-          widget.isFirstLaunch ? '/main' : '/main', // Dynamic initial route
+      initialRoute: '/main',
 
       onGenerateRoute: (settings) {
         Widget page;
@@ -443,40 +406,11 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
           case '/main':
             page = BottomNavScreen();
             break;
-          case '/plans':
-            page = PaymentPage();
-            break;
           default:
             page = OnboardingScreen();
         }
 
         return MaterialPageRoute(builder: (context) => page);
-      },
-    );
-  }
-}
-
-class AppInitializer extends StatelessWidget {
-  const AppInitializer({super.key});
-
-  Future<bool> _checkFirstLaunch() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool firstLaunch = prefs.getBool('firstLaunch') ?? true;
-    if (firstLaunch) {
-      await prefs.setBool('firstLaunch', false);
-    }
-    return firstLaunch;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _checkFirstLaunch(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return MyApp(isFirstLaunch: snapshot.data!);
       },
     );
   }

@@ -1,54 +1,54 @@
+import 'package:flairtips/utils/user_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:goalgenius/utils/auth_service.dart';
-import 'package:goalgenius/utils/colors.dart';
-import 'package:goalgenius/widgets/custom_filled_button.dart';
+import 'package:flairtips/utils/colors.dart';
+import 'package:flairtips/widgets/custom_filled_button.dart';
+import 'package:flairtips/utils/api_service.dart';
+import 'package:provider/provider.dart';
 
 class SignInScreen extends StatefulWidget {
-  final bool toPlans;
-  const SignInScreen({this.toPlans = false, super.key});
+  const SignInScreen({super.key});
 
   @override
   SignInScreenState createState() => SignInScreenState();
 }
 
 class SignInScreenState extends State<SignInScreen> {
-  final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   void handleAuth() async {
     if (_formKey.currentState?.validate() ?? false) {
-      dynamic user = await _authService.signIn(
-        emailController.text,
-        passwordController.text,
-      );
-      if (user != null) {
-        if (widget.toPlans) {
-          Navigator.pushNamed(context, "/plans");
+      setState(() => _isLoading = true);
+      try {
+        await loginUser(emailController.text, passwordController.text);
+        final user = await getSavedUser();
+        if (user != null) {
+          Provider.of<UserProvider>(context, listen: false).setUser(user);
+          Navigator.pushReplacementNamed(context, "/main");
         } else {
-          Navigator.pushNamed(context, "/main");
+          showError("Failed to load user data.");
         }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login failed'),
-            duration: Duration(seconds: 1),
-            backgroundColor: Colors.red,
-          ),
-        );
+      } catch (e) {
+        showError(e.toString().replaceAll('Exception: ', ''));
+      } finally {
+        setState(() => _isLoading = false);
       }
     }
   }
 
-  /*void handleGoogleSignIn() async {
-    dynamic user = await _authService.signInWithGoogle();
-    if (user != null) {
-      Navigator.pushNamed(context, "/main");
-    }
-  }*/
+  void showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,13 +62,11 @@ class SignInScreenState extends State<SignInScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          //padding: const EdgeInsets.symmetric(horizontal: 24.0),
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              //crossAxisAlignment: CrossAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Text(
@@ -129,36 +127,16 @@ class SignInScreenState extends State<SignInScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // TODO: Navigate to forgot password screen
+                    },
                     child: const Text('Forgot password?'),
                   ),
                 ),
                 const SizedBox(height: 20),
-                CustomFilledButton(text: 'Log In', onPressed: handleAuth),
-                /*const SizedBox(height: 20),
-                Row(
-                  children: const [
-                    Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('Or with'),
-                    ),
-                    Expanded(child: Divider()),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: SignInButton(
-                    Buttons.google,
-                    onPressed: handleGoogleSignIn,
-                    text: 'Sign in with Google',
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),*/
+                _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : CustomFilledButton(text: 'Log In', onPressed: handleAuth),
                 const SizedBox(height: 20),
                 Center(
                   child: RichText(
@@ -174,7 +152,10 @@ class SignInScreenState extends State<SignInScreen> {
                           recognizer:
                               TapGestureRecognizer()
                                 ..onTap = () {
-                                  Navigator.pushNamed(context, "/register");
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    "/register",
+                                  );
                                 },
                         ),
                       ],

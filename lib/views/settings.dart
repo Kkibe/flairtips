@@ -1,8 +1,11 @@
+import 'package:flairtips/utils/api_service.dart';
+import 'package:flairtips/utils/user_provider.dart';
+import 'package:flairtips/widgets/faded_divider.dart';
 import 'package:flutter/material.dart';
-import 'package:goalgenius/utils/constants.dart';
-import 'package:goalgenius/utils/url_manager.dart';
-import 'package:goalgenius/widgets/social_icons.dart';
-import 'package:goalgenius/utils/theme_provider.dart';
+import 'package:flairtips/utils/constants.dart';
+import 'package:flairtips/utils/url_manager.dart';
+import 'package:flairtips/widgets/social_icons.dart';
+import 'package:flairtips/utils/theme_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,6 +52,8 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context, listen: true);
+    final user = userProvider.user;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
@@ -129,27 +134,83 @@ class _SettingsState extends State<Settings> {
             icon: Icon(Icons.privacy_tip),
           ),
           SettingsItem(
-            title: 'Terms & conditions',
-            url: termsUrl,
-            icon: Icon(Icons.list_alt_rounded),
-          ),
-          SettingsItem(
             title: 'Rate Us',
             url:
                 'https://play.google.com/store/apps/details?id=$globalPackageName',
             icon: Icon(Icons.stars_rounded),
           ),
-          SettingsItem(
-            title: 'Contact us',
-            url: contactUrl,
-            icon: Icon(Icons.message_rounded),
+          SizedBox(height: 4),
+          Column(
+            children: [
+              SizedBox(height: 8),
+              FadedDivider(
+                color: Colors.grey,
+                thickness: 1,
+                height: 1,
+                fadeWidth: 40,
+              ),
+              SizedBox(height: 8),
+              Card(
+                margin: EdgeInsets.all(4.0),
+                clipBehavior: Clip.hardEdge,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  side: BorderSide(
+                    color: Colors.grey, // Grey border
+                    width: .5, // Border width
+                  ),
+                ),
+                child: InkWell(
+                  onTap:
+                      () => {
+                        user != null
+                            ? userProvider.logout()
+                            : Navigator.pushNamed(context, "/login"),
+                      },
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                    title: Text(
+                      user != null ? "Log Out" : "Sign In",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    trailing: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Icon(
+                        user != null
+                            ? Icons.logout_rounded
+                            : Icons.login_rounded,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 8),
+            ],
           ),
-          SettingsItem(
-            title: 'Report an issue',
-            url: reportUrl,
-            icon: Icon(Icons.info_outline_rounded),
+          Text(
+            "FAQs",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            textAlign: TextAlign.start,
+          ),
+          SizedBox(height: 4),
+          Expanded(
+            child: ListView.builder(
+              itemCount: faqs.length,
+              itemBuilder: (context, index) {
+                final faq = faqs[index];
+                return CustomFAQ(
+                  question: faq['question']!,
+                  answer: faq['answer']!,
+                );
+              },
+            ),
           ),
           SocialIcons(),
+          SizedBox(height: 8),
         ],
       ),
     );
@@ -199,6 +260,66 @@ class SettingsItem extends StatelessWidget {
             padding: EdgeInsets.all(8),
             child: Icon(Icons.arrow_forward_ios_rounded, size: 28),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomFAQ extends StatefulWidget {
+  final String question;
+  final String answer;
+
+  const CustomFAQ({super.key, required this.question, required this.answer});
+
+  @override
+  CustomFAQState createState() => CustomFAQState();
+}
+
+class CustomFAQState extends State<CustomFAQ> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(4.0),
+      clipBehavior: Clip.hardEdge,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        side: BorderSide(
+          color: Colors.grey, // Grey border
+          width: .5, // Border width
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          setState(() => isExpanded = !isExpanded);
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              title: Text(widget.question),
+              trailing: Icon(
+                isExpanded
+                    ? Icons.add_box_rounded
+                    : Icons.indeterminate_check_box_rounded,
+              ),
+              onTap: () => setState(() => isExpanded = !isExpanded),
+            ),
+            AnimatedCrossFade(
+              firstChild: Container(),
+              secondChild: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Text(widget.answer, textAlign: TextAlign.start),
+              ),
+              crossFadeState:
+                  isExpanded
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+              duration: Duration(milliseconds: 200),
+            ),
+          ],
         ),
       ),
     );

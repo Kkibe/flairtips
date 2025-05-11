@@ -1,9 +1,6 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:goalgenius/models/tip.dart';
-import 'package:goalgenius/utils/colors.dart';
-import 'package:goalgenius/widgets/custom_image.dart';
+import 'package:flairtips/models/tip.dart';
+import 'package:flairtips/widgets/custom_image.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Tip tip;
@@ -23,32 +20,37 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           Navigator.pop(context);
         },
       ),
-      title: Column(
-        children: [
-          Text(
-            tip.date,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-          ),
-          SizedBox(height: 4),
-          Text(
-            tip.time,
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w400),
-          ),
-        ],
+      title: Text(
+        "${tip.date} at ${tip.time}",
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
       ),
       centerTitle: true,
       actions: [
-        Padding(
-          padding: EdgeInsets.only(right: 16.0), // Adjust spacing as needed
-          child: Text(
-            tip.odd,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 12.0,
-              color: greenColor,
-            ),
-          ),
-        ),
+        !tip.isPlayed
+            ? Container(
+              width: 41.0,
+              height: 20.0,
+              margin: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.red, // Set the background color to red
+                borderRadius: BorderRadius.circular(
+                  20.0,
+                ), // Set the border radius
+              ),
+              child: Center(
+                child: Text(
+                  "TBD",
+                  style: TextStyle(
+                    color:
+                        Colors
+                            .white, // Text color to contrast with the red background
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12.0, // Adjust font size if needed
+                  ),
+                ),
+              ),
+            )
+            : SizedBox.shrink(),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(100.0),
@@ -65,8 +67,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   Column(
                     children: [
                       CustomImage(
-                        imageString:
-                            "https://cdn.pixabay.com/photo/2013/07/13/10/51/football-157930_1280.png",
+                        imageString: tip.homeImage ?? "",
                         height: 40,
                         width: 40,
                       ),
@@ -82,17 +83,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   SizedBox(width: 4.0),
                   Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        tip.results != "" ? tip.results : "?-?",
+                        tip.isScoreUpdated
+                            ? "${tip.homeScore} - ${tip.awayScore}"
+                            : "?-?",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      SizedBox(height: 8),
                       SizedBox(
                         width: 100,
                         height: 35,
@@ -104,60 +105,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                             side: BorderSide(color: Colors.grey, width: .5),
                           ),
                           child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text(
-                                  "Pick:",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-
-                                !canView
-                                    ? ImageFiltered(
-                                      imageFilter: ImageFilter.blur(
-                                        sigmaX: 5,
-                                        sigmaY: 5,
-                                      ),
-                                      child: Text(
-                                        tip.pick,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    )
-                                    : Text(
-                                      tip.pick,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                              ],
-                            ) /*Stack(
-                              children: [
-                                Text(
-                                  tip.pick,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-
-                                Positioned.fill(
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                      sigmaX: 7,
-                                      sigmaY: 7,
-                                    ),
-                                    child: Container(color: Colors.transparent),
-                                  ),
-                                ),
-                              ],
-                            ),*/,
+                            child: Text(
+                              tip.confidence,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -167,8 +121,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   Column(
                     children: [
                       CustomImage(
-                        imageString:
-                            "https://cdn.pixabay.com/photo/2013/07/13/10/51/football-157930_1280.png",
+                        imageString: tip.awayImage ?? "",
                         height: 40,
                         width: 40,
                       ),

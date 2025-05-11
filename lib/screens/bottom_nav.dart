@@ -1,15 +1,11 @@
 import 'dart:io';
-
+import 'package:flairtips/utils/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:goalgenius/ads/app_open.dart';
-import 'package:goalgenius/ads/banner.dart';
-import 'package:goalgenius/views/help.dart';
-import 'package:goalgenius/views/settings.dart';
-import 'package:goalgenius/views/tickets.dart';
-import 'package:goalgenius/views/tips.dart';
-import 'package:goalgenius/views/vip.dart';
-import 'package:goalgenius/widgets/custom_image.dart';
+import 'package:flairtips/views/settings.dart';
+import 'package:flairtips/views/tips.dart';
+import 'package:flairtips/views/vip.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -25,8 +21,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
   @override
   void initState() {
     super.initState();
-    _pages = [Tips(), Tickets(), Vip(), Help(), Settings()];
-    AppOpenAdManager.loadAd();
+    _pages = [Tips(), Vip(), Settings()];
   }
 
   void _onItemTapped(int index) async {
@@ -53,15 +48,30 @@ class BottomNavScreenState extends State<BottomNavScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: CustomImage(
-            imageString: "assets/logo.png",
-            width: 20,
-            height: 20,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded),
+            onPressed: () {
+              showExitConfirmationDialog(context);
+            },
           ),
-          title: Text(returnTitle(_selectedIndex)),
+          title: Text(returnTitle(context, _selectedIndex)),
           centerTitle: true,
           actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.notifications)),
+            _selectedIndex == 1
+                ? Container(
+                  width: 32,
+                  height: 32,
+                  margin: EdgeInsets.symmetric(horizontal: 8),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: ColorScheme.of(context).primary,
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+
+                  padding: EdgeInsets.all(4),
+                  child: Icon(Icons.workspace_premium_rounded, size: 24),
+                )
+                : SizedBox.shrink(),
           ],
         ),
         body: AnimatedSwitcher(
@@ -85,7 +95,6 @@ class BottomNavScreenState extends State<BottomNavScreen> {
         bottomNavigationBar: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            BannerAdWidget(),
             Padding(
               padding: const EdgeInsets.only(left: 8, right: 8),
               child: Stack(
@@ -128,11 +137,6 @@ class BottomNavScreenState extends State<BottomNavScreen> {
                           label: 'Tips',
                         ),
                         BottomNavigationBarItem(
-                          icon: Icon(Icons.book_outlined, size: 24),
-                          activeIcon: Icon(Icons.book_rounded, size: 26),
-                          label: 'Tickets',
-                        ),
-                        BottomNavigationBarItem(
                           icon: Icon(
                             Icons.workspace_premium_outlined,
                             size: 24,
@@ -141,12 +145,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
                             Icons.workspace_premium_rounded,
                             size: 26,
                           ),
-                          label: 'VIP',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.help_outline, size: 24),
-                          activeIcon: Icon(Icons.help, size: 26),
-                          label: 'Help',
+                          label: 'Premium',
                         ),
                         BottomNavigationBarItem(
                           icon: Icon(Icons.settings_outlined, size: 24),
@@ -166,20 +165,17 @@ class BottomNavScreenState extends State<BottomNavScreen> {
   }
 }
 
-String returnTitle(int index) {
+String returnTitle(BuildContext context, int index) {
   String title;
+  final userProvider = Provider.of<UserProvider>(context);
+  final user = userProvider.user;
+  final isPremium = user?.isPremium ?? false;
 
   switch (index) {
     case 1:
-      title = "Tickets";
+      title = isPremium ? "VIP Tips" : "Enjoy the exclusive benefits!";
       break;
     case 2:
-      title = "VIP";
-      break;
-    case 3:
-      title = "Help";
-      break;
-    case 4:
       title = "Settings";
       break;
     default:
@@ -200,11 +196,7 @@ Future<bool> showExitConfirmationDialog(BuildContext context) async {
               content: Text("Are you sure you want to exit?"),
               actions: [
                 TextButton(
-                  onPressed:
-                      () => {
-                        Navigator.of(context).pop(false),
-                        AppOpenAdManager.showAdIfAvailable(),
-                      },
+                  onPressed: () => {Navigator.of(context).pop(false)},
                   child: Text("Cancel"),
                 ),
                 TextButton(

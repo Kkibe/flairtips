@@ -1,8 +1,9 @@
+import 'package:flairtips/widgets/custom_image.dart';
 import 'package:flutter/material.dart';
-import 'package:goalgenius/models/tip.dart';
-import 'package:goalgenius/screens/tip_detail.dart';
-import 'package:goalgenius/utils/theme_provider.dart';
-import 'package:goalgenius/widgets/faded_divider.dart';
+import 'package:flairtips/models/tip.dart';
+import 'package:flairtips/screens/tip_detail.dart';
+import 'package:flairtips/utils/theme_provider.dart';
+import 'package:flairtips/widgets/faded_divider.dart';
 import 'package:provider/provider.dart';
 
 class MatchCard extends StatelessWidget {
@@ -23,7 +24,13 @@ class MatchCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: getGradientColors(tip.won, themeProvider.isDarkMode),
+            colors: [
+              Colors.green.withOpacity(0.2),
+              themeProvider.isDarkMode
+                  ? Colors.transparent
+                  : Colors.white.withOpacity(0.2),
+              Colors.green.withOpacity(0.2),
+            ],
           ),
         ),
         child: InkWell(
@@ -38,7 +45,7 @@ class MatchCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Padding(
-                padding: EdgeInsets.only(right: 6.0), // Adjust padding
+                padding: EdgeInsets.only(right: 4.0), // Adjust padding
                 child: Row(
                   children: [
                     // Leading: Time Card
@@ -48,13 +55,17 @@ class MatchCard extends StatelessWidget {
                       alignment:
                           Alignment.center, // Center time text vertically
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
+                        horizontal: 4.0,
                       ), // Adjust padding
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
-                          colors: getTimeGradientColors(tip.won),
+                          colors: [
+                            Colors.green.withOpacity(0.2),
+                            //Colors.transparent,
+                            Colors.greenAccent.withOpacity(0.2),
+                          ],
                         ),
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(
@@ -65,20 +76,35 @@ class MatchCard extends StatelessWidget {
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Text(
                             tip.time,
                             style: TextStyle(
                               fontWeight: FontWeight.w400,
-                              fontSize: 10.0,
+                              fontSize: 14.0,
                             ),
                           ),
-                          Text(
-                            "@${tip.odd}",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12.0,
-                              color: ColorScheme.of(context).primary,
+
+                          SizedBox(
+                            width: 60,
+                            height: 35,
+                            child: Card(
+                              margin: EdgeInsets.all(4.0),
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.0),
+                                side: BorderSide(color: Colors.grey, width: .5),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  tip.confidence,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -91,14 +117,14 @@ class MatchCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              /*CustomImage(
-                              imageString:
-                                  "https://cdn.pixabay.com/photo/2013/07/13/10/51/football-157930_1280.png",
-                              height: 12,
-                              width: 12,
-                            ),*/
+                              CustomImage(
+                                imageString: tip.homeImage ?? "",
+                                height: 12,
+                                width: 12,
+                              ),
+                              SizedBox(width: 4),
                               Flexible(
                                 child: Text(
                                   tip.home,
@@ -111,9 +137,9 @@ class MatchCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              tip.status == "finished"
+                              tip.isScoreUpdated && tip.homeScore != ""
                                   ? Text(
-                                    tip.results.split("-").first,
+                                    tip.homeScore,
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
@@ -126,14 +152,14 @@ class MatchCard extends StatelessWidget {
                           FadedDivider(fadeWidth: 60),
                           SizedBox(height: 4),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              /*CustomImage(
-                              imageString:
-                                  "https://cdn.pixabay.com/photo/2013/07/13/10/51/football-157930_1280.png",
-                              height: 12,
-                              width: 12,
-                            ),*/
+                              CustomImage(
+                                imageString: tip.awayImage ?? "",
+                                height: 12,
+                                width: 12,
+                              ),
+                              SizedBox(width: 4),
                               Flexible(
                                 child: Text(
                                   tip.away,
@@ -147,9 +173,9 @@ class MatchCard extends StatelessWidget {
                                 ),
                               ),
 
-                              tip.status == "finished"
+                              tip.isScoreUpdated && tip.awayScore != ""
                                   ? Text(
-                                    tip.results.split("-").last,
+                                    tip.awayScore,
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
@@ -164,7 +190,7 @@ class MatchCard extends StatelessWidget {
 
                     SizedBox(width: 12),
                     SizedBox(
-                      width: tip.status == "finished" ? 80 : 100,
+                      width: 80,
                       height: 35,
                       child: Card(
                         margin: EdgeInsets.all(4.0),
@@ -178,9 +204,7 @@ class MatchCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                tip.status == "finished"
-                                    ? tip.pick
-                                    : "VIEW TIP",
+                                tip.tip,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w400,
@@ -188,8 +212,8 @@ class MatchCard extends StatelessWidget {
                               ),
                               SizedBox(width: 4),
 
-                              tip.status == "finished"
-                                  ? getTipStatusIcon(tip.won)
+                              tip.premium
+                                  ? Text("👑")
                                   : Icon(
                                     Icons.arrow_forward_ios_rounded,
                                     size: 12,
@@ -207,65 +231,5 @@ class MatchCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-Widget getTipStatusIcon(String status) {
-  if (status == "won") {
-    return Icon(Icons.check_circle_outline, size: 12, color: Colors.green);
-  } else if (status == "lost") {
-    return Icon(Icons.cancel_outlined, size: 12, color: Colors.red);
-  } else if (status == "pending") {
-    return Icon(Icons.access_time_outlined, size: 12, color: Colors.orange);
-  } else {
-    return SizedBox.shrink(); // default fallback
-  }
-}
-
-List<Color> getGradientColors(String wonStatus, bool isDarkMode) {
-  switch (wonStatus) {
-    case "won":
-      return [
-        Colors.green.withOpacity(0.2),
-        isDarkMode ? Colors.transparent : Colors.white.withOpacity(0.2),
-        Colors.purpleAccent.withOpacity(0.2),
-      ];
-    case "lost":
-      return [
-        Colors.red.withOpacity(0.2),
-        isDarkMode ? Colors.transparent : Colors.white.withOpacity(0.2),
-        Colors.purpleAccent.withOpacity(0.2),
-      ];
-    case "pending":
-    default:
-      return [
-        Colors.blueAccent.withOpacity(0.2),
-        isDarkMode ? Colors.transparent : Colors.white.withOpacity(0.2),
-        Colors.purpleAccent.withOpacity(0.2),
-      ];
-  }
-}
-
-List<Color> getTimeGradientColors(String wonStatus) {
-  switch (wonStatus) {
-    case "won":
-      return [
-        Colors.green.withOpacity(0.2),
-        //Colors.transparent,
-        Colors.greenAccent.withOpacity(0.2),
-      ];
-    case "lost":
-      return [
-        Colors.red.withOpacity(0.2),
-        //Colors.transparent,
-        Colors.greenAccent.withOpacity(0.2),
-      ];
-    case "pending":
-    default:
-      return [
-        Colors.blueAccent.withOpacity(0.2),
-        //Colors.transparent,
-        Colors.greenAccent.withOpacity(0.2),
-      ];
   }
 }

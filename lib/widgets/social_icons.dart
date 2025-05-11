@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:goalgenius/utils/constants.dart';
-import 'package:goalgenius/utils/url_manager.dart';
+import 'package:flairtips/utils/constants.dart';
+import 'package:flairtips/utils/url_manager.dart';
 
 import '../utils/colors.dart';
 
@@ -35,18 +35,6 @@ class SocialIcons extends StatelessWidget {
                 title: 'Whatsapp',
                 url: whatsappUrl,
                 icon: Icon(FontAwesomeIcons.whatsapp),
-              ),
-
-              SocialItem(
-                title: 'X',
-                url: xtwitterUrl,
-                icon: Icon(FontAwesomeIcons.xTwitter),
-              ),
-
-              SocialItem(
-                title: 'Instagram',
-                url: instagramUrl,
-                icon: Icon(FontAwesomeIcons.instagram),
               ),
             ],
           ),

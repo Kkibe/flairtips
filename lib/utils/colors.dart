@@ -6,15 +6,15 @@ const Color greenColor = Color(0xFF46A56C);
 
 // Light Theme Colors
 const Color kLightBackground = Color(0xFFFFFFFF);
-const Color kLightPrimary = Colors.purpleAccent;
+const Color kLightPrimary = Colors.green;
 const Color kLightAccent = Color(0xFFFFC107);
 const Color kLightSurface = Color(0xFFF5F5F5);
 const Color kLightText = Color(0xFF18181B);
 
 // Dark Theme Colors
 const Color kDarkBackground = Color(0xFF121212);
-const Color kDarkPrimary = Colors.purpleAccent;
-const Color kDarkAccent = Colors.purpleAccent;
+const Color kDarkPrimary = Colors.green;
+const Color kDarkAccent = Colors.greenAccent;
 const Color kDarkSurface = Color(0xFF1C1B20);
 const Color kDarkText = Colors.white;
 const Color white6Percent = Color(0x0FFFFFFF);

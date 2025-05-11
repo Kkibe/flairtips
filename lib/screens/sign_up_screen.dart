@@ -1,41 +1,57 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flairtips/utils/api_service.dart';
+import 'package:flairtips/utils/colors.dart';
+import 'package:flairtips/widgets/custom_filled_button.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:goalgenius/utils/auth_service.dart';
-import 'package:goalgenius/utils/colors.dart';
-import 'package:goalgenius/widgets/custom_filled_button.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  SignUpScreenState createState() => SignUpScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class SignUpScreenState extends State<SignUpScreen> {
-  final AuthService _authService = AuthService();
+class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController fullNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
-
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
-  void handleAuth() async {
+  void handleRegister() async {
     if (_formKey.currentState!.validate()) {
-      User? user = await _authService.signUp(
-        emailController.text,
-        passwordController.text,
-      );
-      if (user != null) {
-        Navigator.pushNamed(context, "/main");
-      } else {
+      if (passwordController.text != confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Passwords do not match'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      try {
+        final result = await registerUser(
+          fullName: fullNameController.text.trim(),
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Registration failed'),
-            duration: Duration(seconds: 1),
+            content: Text(result['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pushReplacementNamed(context, "/login");
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception:', '').trim()),
             backgroundColor: Colors.red,
           ),
         );
@@ -53,145 +69,118 @@ class SignUpScreenState extends State<SignUpScreen> {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          //padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Sign Up',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.center,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              const Text(
+                'Sign In',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+              TextFormField(
+                controller: fullNameController,
+                decoration: const InputDecoration(labelText: "Full Name"),
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? "Enter full name"
+                            : null,
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: "Email"),
+                validator:
+                    (value) =>
+                        value == null || !value.contains("@")
+                            ? "Enter valid email"
+                            : null,
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: passwordController,
+                obscureText: !_isPasswordVisible,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
-                const SizedBox(height: 30),
-                TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email address'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!RegExp(
-                      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-                    ).hasMatch(value)) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: confirmPasswordController,
+                obscureText: !_isConfirmPasswordVisible,
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? "Confirm your password"
+                            : null,
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isConfirmPasswordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: passwordController,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Create Password',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+              ),
+              const SizedBox(height: 20),
+              CustomFilledButton(text: 'Sign Up', onPressed: handleRegister),
+              const SizedBox(height: 20),
+              Center(
+                child: RichText(
+                  text: TextSpan(
+                    text: "Already have an account?",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    children: [
+                      TextSpan(
+                        text: 'Sign in',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(color: greenColor),
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.pushNamed(context, "/login");
+                              },
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: confirmPasswordController,
-                  obscureText: !_isConfirmPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isConfirmPasswordVisible
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isConfirmPasswordVisible =
-                              !_isConfirmPasswordVisible;
-                        });
-                      },
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
-                    }
-                    if (value != passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                CustomFilledButton(text: 'Sign Up', onPressed: handleAuth),
-                const SizedBox(height: 20),
-                Center(
-                  child: RichText(
-                    text: TextSpan(
-                      text: 'Already have an account? ',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      children: [
-                        TextSpan(
-                          text: 'Log in',
-                          style: TextStyle(color: greenColor),
-                          recognizer:
-                              TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.pushNamed(context, "/login");
-                                },
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text.rich(
-                    TextSpan(
-                      text:
-                          "By creating an account or signing in you agree to our ",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w200,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: "terms and conditions",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w200,
-                            color: ColorScheme.of(context).onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

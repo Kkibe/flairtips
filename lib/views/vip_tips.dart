@@ -8,14 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class Tips extends StatefulWidget {
-  const Tips({super.key});
+class VipTips extends StatefulWidget {
+  const VipTips({super.key});
 
   @override
-  State<Tips> createState() => _TipsState();
+  State<VipTips> createState() => _VipTipsState();
 }
 
-class _TipsState extends State<Tips> {
+class _VipTipsState extends State<VipTips> {
   String selectedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
   final GlobalKey _dateScrollWidgetKey = GlobalKey();
   late Future<List<Tip>> _tipsFuture;
@@ -30,7 +30,7 @@ class _TipsState extends State<Tips> {
   void _fetchTips() {
     setState(() {
       isLoading = true;
-      _tipsFuture = getTips(false, selectedDate);
+      _tipsFuture = getTips(true, selectedDate);
     });
 
     _tipsFuture
