@@ -1,5 +1,5 @@
 //social urls
-const String facebookUrl = 'https://www.facebook.com';
+const String facebookUrl = 'https://flairtips.com/contact-us#';
 const String telegramUrl = 'https://t.me';
 const String whatsappUrl = 'https://whatsapp.com';
 

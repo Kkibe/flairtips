@@ -1,5 +1,7 @@
+import 'package:flairtips/utils/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class DateScrollWidget extends StatefulWidget {
   final Function(String) onDateSelected; // Callback for selected date
@@ -34,6 +36,7 @@ class DateScrollWidgetState extends State<DateScrollWidget>
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     List<Map<String, String>> dateList = getDateRange(6, 0);
     return Container(
       height: 52,
@@ -66,8 +69,8 @@ class DateScrollWidgetState extends State<DateScrollWidget>
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [
-                    Colors.blueAccent.withOpacity(0.1),
-                    Colors.green.withOpacity(0.2),
+                    Theme.of(context).colorScheme.primary.withAlpha(26),
+                    Theme.of(context).colorScheme.secondary.withAlpha(64),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(
@@ -82,7 +85,9 @@ class DateScrollWidgetState extends State<DateScrollWidget>
                     style: TextStyle(
                       color:
                           isSelected
-                              ? Theme.of(context).colorScheme.primary
+                              ? themeProvider.isDarkMode
+                                  ? Theme.of(context).colorScheme.secondary
+                                  : Theme.of(context).colorScheme.primary
                               : Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight:
@@ -94,7 +99,9 @@ class DateScrollWidgetState extends State<DateScrollWidget>
                     style: TextStyle(
                       color:
                           isSelected
-                              ? Theme.of(context).colorScheme.primary
+                              ? themeProvider.isDarkMode
+                                  ? Theme.of(context).colorScheme.secondary
+                                  : Theme.of(context).colorScheme.primary
                               : Theme.of(context).colorScheme.onSurface,
                       fontSize: 10,
                       fontWeight: FontWeight.w400,

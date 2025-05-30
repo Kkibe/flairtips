@@ -107,9 +107,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: ColorScheme.of(
-                            context,
-                          ).primary.withOpacity(0.5),
+                          color: ColorScheme.of(context).primary.withAlpha(128),
                           blurRadius: 12,
                           offset: Offset(0, 4),
                           spreadRadius: 2,

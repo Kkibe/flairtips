@@ -148,7 +148,9 @@ class SignInScreenState extends State<SignInScreen> {
                           text: 'Sign up',
                           style: Theme.of(
                             context,
-                          ).textTheme.bodyMedium?.copyWith(color: greenColor),
+                          ).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           recognizer:
                               TapGestureRecognizer()
                                 ..onTap = () {

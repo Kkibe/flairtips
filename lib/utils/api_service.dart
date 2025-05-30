@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flairtips/models/tip.dart';
 import 'package:flairtips/models/user.dart';
-import 'package:flairtips/utils/user_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -121,7 +120,7 @@ Future<List<Tip>> getTips(bool isPremiumScreen, String date) async {
   final response = await http.post(
     Uri.parse(
       isPremiumScreen
-          ? '$baseUrl/fixtures/fixture_details'
+          ? '$baseUrl/fixtures/fixtures'
           : '$baseUrl/fixtures/get_fixtures',
     ),
     headers: headers,

@@ -145,11 +145,11 @@ class _VipState extends State<Vip> {
               user != null
                   ? Column(
                     children: [
-                      PlanCard(charge: .00, billing: "Daily", planId: 1),
+                      PlanCard(charge: 50.00, billing: "Daily", planId: 1),
                       SizedBox(height: 4),
-                      PlanCard(charge: 2.00, billing: "Weekly", planId: 2),
+                      PlanCard(charge: 300.00, billing: "Weekly", planId: 2),
                       SizedBox(height: 4),
-                      PlanCard(charge: 3.00, billing: "Monthly", planId: 3),
+                      PlanCard(charge: 1000.00, billing: "Monthly", planId: 3),
                     ],
                   )
                   : Column(

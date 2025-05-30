@@ -359,7 +359,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
           backgroundColor: darkColorScheme.surface,
-          selectedItemColor: darkColorScheme.primary,
+          selectedItemColor: darkColorScheme.secondary,
           unselectedItemColor: darkColorScheme.onSurface,
           elevation: 10,
           type: BottomNavigationBarType.fixed,

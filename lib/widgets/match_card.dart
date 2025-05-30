@@ -25,11 +25,11 @@ class MatchCard extends StatelessWidget {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              Colors.green.withOpacity(0.2),
+              Theme.of(context).colorScheme.primary.withAlpha(52),
               themeProvider.isDarkMode
                   ? Colors.transparent
-                  : Colors.white.withOpacity(0.2),
-              Colors.green.withOpacity(0.2),
+                  : Colors.white.withAlpha(52),
+              Theme.of(context).colorScheme.primary.withAlpha(52),
             ],
           ),
         ),
@@ -62,9 +62,11 @@ class MatchCard extends StatelessWidget {
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            Colors.green.withOpacity(0.2),
+                            Theme.of(context).colorScheme.primary.withAlpha(52),
                             //Colors.transparent,
-                            Colors.greenAccent.withOpacity(0.2),
+                            Theme.of(
+                              context,
+                            ).colorScheme.secondary.withAlpha(52),
                           ],
                         ),
                         borderRadius: const BorderRadius.only(

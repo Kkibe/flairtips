@@ -32,7 +32,10 @@ class PlanCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: [Colors.transparent, Colors.green.withOpacity(0.2)],
+            colors: [
+              Colors.transparent,
+              Theme.of(context).colorScheme.primary.withAlpha(52),
+            ],
           ),
         ),
         child: InkWell(
@@ -70,7 +73,7 @@ class PlanCard extends StatelessWidget {
                           end: Alignment.centerRight,
                           colors: [
                             Colors.transparent,
-                            Colors.green.withOpacity(0.2),
+                            Theme.of(context).colorScheme.primary.withAlpha(52),
                           ],
                         ),
                         border: Border.all(color: Colors.grey, width: 0.5),

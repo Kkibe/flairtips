@@ -43,7 +43,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message']),
-            backgroundColor: Colors.green,
+            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
 
@@ -167,9 +167,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     children: [
                       TextSpan(
                         text: 'Sign in',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(color: greenColor),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                         recognizer:
                             TapGestureRecognizer()
                               ..onTap = () {

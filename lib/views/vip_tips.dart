@@ -48,14 +48,14 @@ class _VipTipsState extends State<VipTips> {
             });
             // Optionally show an error
             if (error is UnauthorizedException) {
-              final userProvider = Provider.of<UserProvider>(
+              /*final userProvider = Provider.of<UserProvider>(
                 context,
                 listen: false,
               );
               await userProvider.logout();
               if (mounted) {
                 Navigator.pushReplacementNamed(context, '/login');
-              }
+              }*/
             } else {
               // Handle other errors if needed
               ScaffoldMessenger.of(
