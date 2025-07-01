@@ -1,7 +1,7 @@
 import 'package:flairtips/models/tip.dart';
 import 'package:flairtips/utils/api_service.dart';
 import 'package:flairtips/utils/user_provider.dart';
-import 'package:flairtips/widgets/DateScrollWidget.dart';
+import 'package:flairtips/widgets/ScrollDate.dart';
 import 'package:flairtips/widgets/league_card.dart';
 import 'package:flairtips/widgets/match_card.dart';
 import 'package:flutter/material.dart';
@@ -17,65 +17,100 @@ class VipTips extends StatefulWidget {
 
 class _VipTipsState extends State<VipTips> {
   String selectedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
-  final GlobalKey _dateScrollWidgetKey = GlobalKey();
-  late Future<List<Tip>> _tipsFuture;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _ScrollDateKey = GlobalKey();
+
+  final List<Tip> _tips = [];
+  bool _isFetchingMore = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _fetchTips();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 300 &&
+          !_isFetchingMore &&
+          _hasMore) {
+        _loadMoreTips();
+      }
+    });
   }
 
-  void _fetchTips() {
-    setState(() {
-      isLoading = true;
-      _tipsFuture = getTips(true, selectedDate);
-    });
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-    _tipsFuture
-        .then((_) {
-          if (mounted) {
-            setState(() {
-              isLoading = false;
-            });
-          }
+  void _fetchTips({bool reset = true}) async {
+    if (reset) {
+      _tips.clear();
+      _currentPage = 1;
+      _hasMore = true;
+      isLoading = true;
+    }
+
+    getTips(true, selectedDate, _currentPage)
+        .then((newTips) {
+          setState(() {
+            isLoading = false;
+            _tips.addAll(newTips);
+            _hasMore = newTips.isNotEmpty;
+            _isFetchingMore = false;
+          });
         })
         .catchError((error) async {
-          if (mounted) {
-            setState(() {
-              isLoading = false;
-            });
-            // Optionally show an error
-            if (error is UnauthorizedException) {
-              /*final userProvider = Provider.of<UserProvider>(
-                context,
-                listen: false,
-              );
-              await userProvider.logout();
-              if (mounted) {
-                Navigator.pushReplacementNamed(context, '/login');
-              }*/
-            } else {
-              // Handle other errors if needed
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(error.toString())));
+          setState(() {
+            isLoading = false;
+            _isFetchingMore = false;
+          });
+
+          // Optionally show an error
+          if (error is UnauthorizedException) {
+            final userProvider = Provider.of<UserProvider>(
+              context,
+              listen: false,
+            );
+            await userProvider.logout();
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, '/login');
             }
+          } else {
+            // Handle other errors if needed
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(error.toString())));
           }
         });
   }
 
+  void _loadMoreTips() {
+    if (_isFetchingMore || !_hasMore) return;
+
+    setState(() => _isFetchingMore = true);
+    _currentPage++;
+    _fetchTips(reset: false);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final uniqueTips =
+        _tips.toSet().toList(); // quick Dart deduplication by object
+    final groupedTips = _groupTipsByLeagueName(_deduplicateTips(uniqueTips));
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: _getAppBarSize(),
         child: AppBar(
           bottom: PreferredSize(
             preferredSize: _getAppBarSize(),
-            child: DateScrollWidget(
-              key: _dateScrollWidgetKey,
+            child: ScrollDate(
+              key: _ScrollDateKey,
               onDateSelected: (date) {
                 final parsed = DateFormat('yyyy-MM-dd').parse(date);
                 setState(() {
@@ -90,84 +125,73 @@ class _VipTipsState extends State<VipTips> {
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
-              : FutureBuilder<List<Tip>>(
-                future: _tipsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Center(child: Text("Something went wrong"));
-                  }
+              : groupedTips.isEmpty
+              ? const Center(child: Text('No tips available for this date'))
+              : ListView(
+                controller: _scrollController,
+                children: [
+                  ...groupedTips.entries.map((entry) {
+                    final leagueName = entry.key;
+                    final tipsInLeague = entry.value;
+                    final logoTip = tipsInLeague.firstWhere(
+                      (tip) => tip.leagueLogo.isNotEmpty,
+                      orElse: () => tipsInLeague.first,
+                    );
 
-                  final tips = snapshot.data ?? [];
-
-                  final groupedTips = _groupTipsByLeagueName(tips);
-
-                  return groupedTips.isEmpty
-                      ? const Center(
-                        child: Text('No tips available for this date'),
-                      )
-                      : ListView(
-                        children:
-                            groupedTips.entries.map((entry) {
-                              final leagueName = entry.key;
-                              final tipsInLeague = entry.value;
-                              final logoTip = tipsInLeague.firstWhere(
-                                (tip) => tip.leagueLogo.isNotEmpty,
-                                orElse: () => tipsInLeague.first,
-                              );
-                              final countryName = logoTip.country;
-
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                  horizontal: 12.0,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                      ),
-                                      child: LeagueCard(
-                                        countryName: countryName,
-                                        leagueName: leagueName,
-                                        leagueLogo: logoTip.leagueLogo,
-                                      ),
-                                    ),
-                                    ...tipsInLeague.map(
-                                      (tip) => MatchCard(tip: tip),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                      );
-                },
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 4.0,
+                        horizontal: 12.0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          LeagueCard(
+                            countryName: logoTip.country,
+                            leagueName: leagueName,
+                            leagueLogo: logoTip.leagueLogo,
+                          ),
+                          ...tipsInLeague.map((tip) => MatchCard(tip: tip)),
+                        ],
+                      ),
+                    );
+                  }),
+                  if (_isFetchingMore)
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                ],
               ),
     );
   }
 
+  // Update this method if needed
   Map<String, List<Tip>> _groupTipsByLeagueName(List<Tip> tips) {
     final Map<String, List<Tip>> grouped = {};
     for (var tip in tips) {
-      final league = tip.leagueName;
-      if (!grouped.containsKey(league)) {
-        grouped[league] = [];
-      }
-      grouped[league]!.add(tip);
+      grouped.putIfAbsent(tip.leagueName, () => []).add(tip);
     }
     return grouped;
   }
 
+  List<Tip> _deduplicateTips(List<Tip> tips) {
+    final seenGameIds = <String>{};
+    final uniqueTips = <Tip>[];
+
+    for (final tip in tips) {
+      if (!seenGameIds.contains(tip.id)) {
+        seenGameIds.add(tip.id);
+        uniqueTips.add(tip);
+      }
+    }
+
+    return uniqueTips;
+  }
+
   Size _getAppBarSize() {
     final RenderBox? renderBox =
-        _dateScrollWidgetKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final size = renderBox.size;
-      return Size.fromHeight(size.height);
-    } else {
-      return const Size.fromHeight(52);
-    }
+        _ScrollDateKey.currentContext?.findRenderObject() as RenderBox?;
+    return renderBox?.size ?? const Size.fromHeight(52);
   }
 }

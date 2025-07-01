@@ -1,6 +1,6 @@
 import 'package:flairtips/utils/api_service.dart';
 import 'package:flairtips/utils/user_provider.dart';
-import 'package:flairtips/widgets/custom_filled_button.dart';
+import 'package:flairtips/widgets/filled_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -87,7 +87,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 const SizedBox(height: 20),
                 _isLoading
                     ? CircularProgressIndicator()
-                    : CustomFilledButton(
+                    : AppFilledButton(
                       text: "Pay Now",
                       onPressed:
                           () => {

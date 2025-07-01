@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class DateScrollWidget extends StatefulWidget {
+class ScrollDate extends StatefulWidget {
   final Function(String) onDateSelected; // Callback for selected date
-  const DateScrollWidget({super.key, required this.onDateSelected});
+  const ScrollDate({super.key, required this.onDateSelected});
 
   @override
-  DateScrollWidgetState createState() => DateScrollWidgetState();
+  ScrollDateState createState() => ScrollDateState();
 }
 
-class DateScrollWidgetState extends State<DateScrollWidget>
+class ScrollDateState extends State<ScrollDate>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true; // Keep widget alive

@@ -96,7 +96,7 @@ Future<bool> isLoggedIn() async {
   return token != null;
 }
 
-Future<List<Tip>> getTips(bool isPremiumScreen, String date) async {
+Future<List<Tip>> getTips(bool isPremiumScreen, String date, int page) async {
   final requestId = DateTime.now().millisecondsSinceEpoch;
 
   String? token;
@@ -108,7 +108,7 @@ Future<List<Tip>> getTips(bool isPremiumScreen, String date) async {
   final requestBody = jsonEncode({
     "request": {
       "request_id": requestId,
-      "data": {"date": date, "type": "all", "page": 1, "country": ""},
+      "data": {"date": date, "type": "all", "page": page, "country": ""},
     },
   });
 
@@ -181,9 +181,11 @@ Future<List<Tip>> getTips(bool isPremiumScreen, String date) async {
       }
 
       return tips;
+    } else if (body['status'] == 0) {
+      throw Exception(body['message'] ?? 'There are no pending events');
     } else {
       // If it's a premium screen and the token is invalid, throw
-      if (isPremiumScreen) {
+      if (isPremiumScreen && body['status'] == 403) {
         throw UnauthorizedException(body['message'] ?? 'Unauthorized access');
       }
       throw Exception(body['message'] ?? 'Failed to fetch tips');

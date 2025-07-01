@@ -1,6 +1,5 @@
 import 'package:flairtips/utils/api_service.dart';
-import 'package:flairtips/utils/colors.dart';
-import 'package:flairtips/widgets/custom_filled_button.dart';
+import 'package:flairtips/widgets/filled_button.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -157,7 +156,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              CustomFilledButton(text: 'Sign Up', onPressed: handleRegister),
+              AppFilledButton(text: 'Sign Up', onPressed: handleRegister),
               const SizedBox(height: 20),
               Center(
                 child: RichText(

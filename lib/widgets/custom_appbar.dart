@@ -1,14 +1,14 @@
+import 'package:flairtips/utils/format_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flairtips/models/tip.dart';
 import 'package:flairtips/widgets/custom_image.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Tip tip;
-  final bool canView;
   @override
   final Size preferredSize;
 
-  const CustomAppBar({required this.tip, required this.canView, super.key})
+  const CustomAppBar({required this.tip, super.key})
     : preferredSize = const Size.fromHeight(120.0);
 
   @override
@@ -21,12 +21,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         },
       ),
       title: Text(
-        "${tip.date} at ${tip.time}",
+        "${formatMatchDate(tip.fixtureDate)} at ${formatTime(tip.fixtureDate)}",
         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
       ),
       centerTitle: true,
       actions: [
-        !tip.isPlayed
+        !tip.isPlayed || tip.playing.toUpperCase() == "UPCOMING"
             ? Container(
               width: 41.0,
               height: 20.0,
@@ -85,9 +85,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   Column(
                     children: [
                       Text(
-                        tip.isScoreUpdated
-                            ? "${tip.homeScore} - ${tip.awayScore}"
-                            : "?-?",
+                        //tip.isScoreUpdated?
+                        "${tip.homeScore} - ${tip.awayScore}",
+                        //: "?-?",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

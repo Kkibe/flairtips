@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 // Reusable Button Component
-class CustomFilledButton extends StatelessWidget {
+class AppOutlinedButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
 
-  const CustomFilledButton({
+  const AppOutlinedButton({
     super.key,
     required this.text,
     required this.onPressed,
@@ -13,6 +13,6 @@ class CustomFilledButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(onPressed: onPressed, child: Text(text));
+    return OutlinedButton(onPressed: onPressed, child: Text(text));
   }
 }

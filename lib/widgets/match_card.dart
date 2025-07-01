@@ -1,3 +1,4 @@
+import 'package:flairtips/utils/format_date_time.dart';
 import 'package:flairtips/widgets/custom_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flairtips/models/tip.dart';
@@ -81,7 +82,7 @@ class MatchCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Text(
-                            tip.time,
+                            formatTime(tip.fixtureDate),
                             style: TextStyle(
                               fontWeight: FontWeight.w400,
                               fontSize: 14.0,
@@ -119,27 +120,34 @@ class MatchCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              CustomImage(
-                                imageString: tip.homeImage ?? "",
-                                height: 12,
-                                width: 12,
-                              ),
-                              SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  tip.home,
-                                  overflow:
-                                      TextOverflow
-                                          .ellipsis, // Prevents overflow
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  CustomImage(
+                                    imageString: tip.homeImage ?? "",
+                                    height: 12,
+                                    width: 12,
                                   ),
-                                ),
+                                  SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      tip.home,
+                                      overflow:
+                                          TextOverflow
+                                              .ellipsis, // Prevents overflow
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              tip.isScoreUpdated && tip.homeScore != ""
+
+                              tip.homeScore !=
+                                      "" //tip.isScoreUpdated &&
                                   ? Text(
                                     tip.homeScore,
                                     style: TextStyle(
@@ -150,32 +158,38 @@ class MatchCard extends StatelessWidget {
                                   : SizedBox.shrink(),
                             ],
                           ),
+
                           SizedBox(height: 4),
                           FadedDivider(fadeWidth: 60),
                           SizedBox(height: 4),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              CustomImage(
-                                imageString: tip.awayImage ?? "",
-                                height: 12,
-                                width: 12,
-                              ),
-                              SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  tip.away,
-                                  overflow:
-                                      TextOverflow
-                                          .ellipsis, // Prevents overflow
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  CustomImage(
+                                    imageString: tip.awayImage ?? "",
+                                    height: 12,
+                                    width: 12,
                                   ),
-                                ),
+                                  SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      tip.away,
+                                      overflow:
+                                          TextOverflow
+                                              .ellipsis, // Prevents overflow
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-
-                              tip.isScoreUpdated && tip.awayScore != ""
+                              tip.awayScore !=
+                                      "" //tip.isScoreUpdated &&
                                   ? Text(
                                     tip.awayScore,
                                     style: TextStyle(
@@ -214,12 +228,10 @@ class MatchCard extends StatelessWidget {
                               ),
                               SizedBox(width: 4),
 
-                              tip.premium
+                              /*tip.premium
                                   ? Text("👑")
-                                  : Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    size: 12,
-                                  ),
+                                  : */
+                              Icon(Icons.arrow_forward_ios_rounded, size: 12),
                             ],
                           ),
                         ),

@@ -1,4 +1,3 @@
-import 'package:flairtips/utils/api_service.dart';
 import 'package:flairtips/utils/user_provider.dart';
 import 'package:flairtips/widgets/faded_divider.dart';
 import 'package:flutter/material.dart';

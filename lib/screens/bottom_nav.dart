@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flairtips/utils/user_provider.dart';
+import 'package:flairtips/views/tips_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flairtips/views/settings.dart';
-import 'package:flairtips/views/tips.dart';
 import 'package:flairtips/views/vip.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +21,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
   @override
   void initState() {
     super.initState();
-    _pages = [Tips(), Vip(), Settings()];
+    _pages = [TipsScreen(premium: false), Vip(), Settings()];
   }
 
   void _onItemTapped(int index) async {

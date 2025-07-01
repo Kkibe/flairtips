@@ -1,7 +1,7 @@
 import 'package:flairtips/utils/user_provider.dart';
-import 'package:flairtips/views/vip_tips.dart';
-import 'package:flairtips/widgets/custom_filled_button.dart';
-import 'package:flairtips/widgets/custom_outlined_button.dart';
+import 'package:flairtips/views/tips_screen.dart';
+import 'package:flairtips/widgets/filled_button.dart';
+import 'package:flairtips/widgets/outlined_button.dart';
 import 'package:flairtips/widgets/plan_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -70,7 +70,7 @@ class _VipState extends State<Vip> {
     final user = userProvider.user;
     final isUserPremium = user?.isPremium ?? false;
     return isUserPremium
-        ? VipTips()
+        ? TipsScreen(premium: true)
         : Padding(
           padding: EdgeInsets.all(12.0),
           child: Column(
@@ -155,14 +155,14 @@ class _VipState extends State<Vip> {
                   : Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      CustomFilledButton(
+                      AppFilledButton(
                         text: "Sign In",
                         onPressed: () {
                           Navigator.pushNamed(context, "/login");
                         },
                       ),
                       SizedBox(height: 16),
-                      CustomOutlinedButton(
+                      AppOutlinedButton(
                         text: 'Create account',
                         onPressed: () {
                           Navigator.pushNamed(context, "/register");

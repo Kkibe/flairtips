@@ -1,7 +1,7 @@
 import 'package:flairtips/utils/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flairtips/widgets/custom_filled_button.dart';
-import 'package:flairtips/widgets/custom_outlined_button.dart';
+import 'package:flairtips/widgets/filled_button.dart';
+import 'package:flairtips/widgets/outlined_button.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -71,14 +71,14 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                CustomFilledButton(
+                AppFilledButton(
                   text: "Sign In",
                   onPressed: () {
                     Navigator.pushNamed(context, "/login");
                   },
                 ),
                 SizedBox(height: 16),
-                CustomOutlinedButton(
+                AppOutlinedButton(
                   text: 'Create account',
                   onPressed: () {
                     Navigator.pushNamed(context, "/register");

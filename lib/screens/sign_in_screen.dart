@@ -1,8 +1,7 @@
 import 'package:flairtips/utils/user_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flairtips/utils/colors.dart';
-import 'package:flairtips/widgets/custom_filled_button.dart';
+import 'package:flairtips/widgets/filled_button.dart';
 import 'package:flairtips/utils/api_service.dart';
 import 'package:provider/provider.dart';
 
@@ -136,7 +135,7 @@ class SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 20),
                 _isLoading
                     ? Center(child: CircularProgressIndicator())
-                    : CustomFilledButton(text: 'Log In', onPressed: handleAuth),
+                    : AppFilledButton(text: 'Log In', onPressed: handleAuth),
                 const SizedBox(height: 20),
                 Center(
                   child: RichText(
